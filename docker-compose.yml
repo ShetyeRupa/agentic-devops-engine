@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  relayfree:
+    image: ghcr.io/msmarkgu/relayfree:latest
+    container_name: relayfree_llm
+    ports:
+      - "8000:8000"
+    environment:
+      # Optional: Add your free API keys for better rate limits
+      - GEMINI_APIKEY=${GEMINI_APIKEY:-}
+      - GROQ_APIKEY=${GROQ_APIKEY:-}
+      - MISTRAL_APIKEY=${MISTRAL_APIKEY:-}
+      - COHERE_APIKEY=${COHERE_APIKEY:-}
+      - DEEPSEEK_APIKEY=${DEEPSEEK_APIKEY:-}
+    restart: unless-stopped
+    volumes:
+      - ./relayfree_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

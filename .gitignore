@@ -1,0 +1,41 @@
+cat > .gitignore << 'EOF'
+# Virtual Environment
+agentic_devops_engine/
+venv/
+env/
+.env.local
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Temporary sandbox files
+sandbox_source.py
+generated_tests.py
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables with secrets
+.env
+
+# Docker
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Litellm cache
+.cache/
+EOF
