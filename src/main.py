@@ -5,7 +5,14 @@ import asyncio
 import requests
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.conditions import TextMentionTermination
-from agents import coder_agent, critic_agent
+
+# Conditional imports based on environment
+if os.getenv("GITHUB_EVENT_PATH"):
+    from reviewer_agents import reviewer_agent, qa_agent
+    agents_to_use = [reviewer_agent, qa_agent]
+else:
+    from agents import coder_agent, critic_agent
+    agents_to_use = [coder_agent, critic_agent]
 
 def get_github_context():
     """Extracts git pull request contextual metadata if operating inside a cloud CI/CD worker."""
@@ -28,7 +35,7 @@ async def run_pipeline():
     git_ctx = get_github_context()
     
     if git_ctx:
-        task_prompt = f"Review and patch the following pull request code changes:\n\n{git_ctx['diff']}"
+        task_prompt = f"Review the following pull request code changes and provide detailed feedback:\n\n{git_ctx['diff']}"
     else:
         # Default local fallback prompt for immediate verification
         task_prompt = "Write a secure function to validate user emails and compute password hash strength scores. Include both the implementation and pytest test cases."
@@ -37,7 +44,7 @@ async def run_pipeline():
     print("-" * 80)
     
     termination = TextMentionTermination("APPROVED")
-    team = RoundRobinGroupChat([coder_agent, critic_agent], termination_condition=termination, max_turns=10)
+    team = RoundRobinGroupChat(agents_to_use, termination_condition=termination, max_turns=10)
 
     full_transcript = []
     async for message in team.run_stream(task=task_prompt):
@@ -52,8 +59,12 @@ async def run_pipeline():
 
     # If running inside GitHub actions, comment the full multi-agent transcript onto the PR thread
     if git_ctx and full_transcript:
-        markdown_body = "## AI Multi-Agent Pipeline Execution Summary\n" + "\n".join(full_transcript)
-        requests.post(git_ctx["comments_url"], json={"body": markdown_body}, headers=git_ctx["headers"])
+        markdown_body = "## AI Multi-Agent Pipeline Execution Summary\n\n" + "\n".join(full_transcript)
+        response = requests.post(git_ctx["comments_url"], json={"body": markdown_body}, headers=git_ctx["headers"])
+        if response.status_code == 201:
+            print("Review posted to PR")
+        else:
+            print(f"Failed to post to PR: {response.status_code}")
     
     print("\n" + "=" * 80)
     print("Pipeline execution completed.")
