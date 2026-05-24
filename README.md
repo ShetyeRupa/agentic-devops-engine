@@ -14,6 +14,7 @@
 [![OpenAI](https://img.shields.io/badge/OpenAI-API-412991.svg)](https://openai.com/)
 [![Azure OpenAI](https://img.shields.io/badge/Azure_OpenAI-Service-0078D4.svg)](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI/CD Pipeline](https://github.com/ShetyeRupa/agentic-devops-engine/actions/workflows/agent_review.yml/badge.svg)](https://github.com/ShetyeRupa/agentic-devops-engine/actions/workflows/agent_review.yml)
 
 </div>
 
